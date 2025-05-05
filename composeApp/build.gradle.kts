@@ -41,6 +41,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtime.compose)
 
             implementation(libs.circuit)
+            implementation(libs.koin.compose)
         }
     }
 }

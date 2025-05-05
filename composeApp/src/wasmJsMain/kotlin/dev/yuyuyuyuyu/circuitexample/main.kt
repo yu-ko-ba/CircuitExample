@@ -8,24 +8,29 @@ import com.slack.circuit.foundation.CircuitCompositionLocals
 import com.slack.circuit.foundation.NavigableCircuitContent
 import com.slack.circuit.foundation.rememberCircuitNavigator
 import kotlinx.browser.document
+import org.koin.compose.KoinContext
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
-    val emailRepository = EmailRepository()
-    val circuit = Circuit.Builder()
-        .addPresenterFactory(InboxPresenter.Factory(emailRepository))
-        .addUi<InboxScreen, InboxScreen.State> { state, modifier -> Inbox(state, modifier) }
-        .addPresenterFactory(DetailPresenter.Factory(emailRepository))
-        .addUi<DetailScreen, DetailScreen.State> { state, modifier -> EmailDetail(state, modifier) }
-        .build()
+    initKoin()
 
     ComposeViewport(document.body!!) {
-        val backStack = rememberSaveableBackStack(root = InboxScreen)
-        val navigator = rememberCircuitNavigator(backStack) {
-        }
+        KoinContext {
+            val circuit = Circuit.Builder()
+                .addPresenterFactory(InboxPresenter.Factory(koinInject()))
+                .addUi<InboxScreen, InboxScreen.State> { state, modifier -> Inbox(state, modifier) }
+                .addPresenterFactory(DetailPresenter.Factory(koinInject()))
+                .addUi<DetailScreen, DetailScreen.State> { state, modifier -> EmailDetail(state, modifier) }
+                .build()
 
-        CircuitCompositionLocals(circuit) {
-            NavigableCircuitContent(navigator = navigator, backStack = backStack)
+            val backStack = rememberSaveableBackStack(root = InboxScreen)
+            val navigator = rememberCircuitNavigator(backStack) {
+            }
+
+            CircuitCompositionLocals(circuit) {
+                NavigableCircuitContent(navigator = navigator, backStack = backStack)
+            }
         }
     }
 }
